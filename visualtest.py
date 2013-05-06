@@ -9,7 +9,8 @@ from visual import *
 from joystickreader import JoystickReader, BadInputError
 
 def main():
-    square = box(pos=vector(1, 1), size=(0.1, 0.1), color=color.blue)
+    canvas = box(pos=vector(0, 0), size=(10,10), color=color.white)
+    square = box(pos=vector(0, 0), size=(1, 1), color=color.blue)
     
     deltat = 0.005
     
@@ -48,8 +49,10 @@ def main():
             y = 0
         
         square.velocity = vector(x, y)
-        
-        square.pos = square.pos + square.velocity*deltat
+
+        new_pos = square.pos + square.velocity*deltat
+        if abs(new_pos.x) <= (canvas.size.x / 2) and abs(new_pos.y) <= (canvas.size.y / 2):
+            square.pos = new_pos
 
 if __name__ == '__main__':
     main()
