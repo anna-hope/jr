@@ -51,9 +51,11 @@ class JoystickReader(object):
         return (self.ser.readline(), self.ser.readline(),
              self.ser.readline(), self.ser.readline())
 
-    def interpret_values(self, sorted_values):
+    def interpret_values(self, sorted_values=None):
         '''Interprets the pre-sorted joystick data.
         Raises BadInputError when there is something wrong with the data.'''
+        if sorted_values is None:
+            sorted_values = self.read_values()
         button_value = sorted_values[0]
         # let's check that we are given correctly sorted values with the right data 
         # (3 items, button value, which is at index 0, has to be 1 or 2)

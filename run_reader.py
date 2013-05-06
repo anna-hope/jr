@@ -13,7 +13,7 @@ def main():
     
     while True:
         try:
-            values = jr.interpret_values(jr.read_values())
+            values = jr.interpret_values()
         # sometimes there is a random ValueError, whose origin I'm still not sure of
         except ValueError:
             continue
