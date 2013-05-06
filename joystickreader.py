@@ -1,7 +1,7 @@
-#!/usr/bin/env python3.3
-
 # (c) Anton Osten for the PyBot Project
 
+# in case we're run from python2
+from __future__ import division
 import serial
 
 # a custom exception for when we are given bad data
@@ -10,8 +10,8 @@ class BadInputError(Exception):
         return 'Bad input data'
 
 class JoystickReader(object):
-    def __init__(self, port='/dev/tty.usbmodemfd121'):
-        self.ser = serial.Serial(port)
+    def __init__(self, port='/dev/tty.usbmodemfd121', baudrate=9600):
+        self.ser = serial.Serial(port, baudrate=baudrate)
         
     # let's have a few fancy decorators to help us interpret the input
 
