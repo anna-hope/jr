@@ -6,7 +6,7 @@ import serial
 
 # a custom exception for when we are given bad data
 class BadInputError(Exception):
-    def __init__(self, message):
+    def __init__(self, message='Bad input data'):
         self.message = message
     
     def __str__(self):
@@ -16,43 +16,16 @@ class JoystickReader(object):
     def __init__(self, port='/dev/tty.usbmodemfd121', baudrate=9600):
         self.ser = serial.Serial(port, baudrate=baudrate)
         
-    # let's have a few fancy decorators to help us interpret the input
-
-    # this one is to convert input data to a tuple of integer values
-    def convert_values(fn):
-        def wrapped(*args):
-            values = fn(*args)
-            return (int(values[0].decode('ascii').strip()),
-                    int(values[1].decode('ascii').strip()),
-                    int(values[2].decode('ascii').strip()),
-                    int(values[3].decode('ascii').strip()))
-        return wrapped
-
-    # this one is to apply the sort_input function
-    def sort_values(fn):
-        def wrapped(*args):
-            '''The format of input data is (0, button_value, y_value, x_value).
-            Note that it can be shifted.'''
-            values = fn(*args)
-            # get the index of the begginning 0
-            start_index = values.index(0)
-            # we need to get other indeces accounting for the shift
-            # the formula goes like this: abs(normal_index - start_index)
-            button_index = abs(1 - start_index)
-            y_index = abs(2 - start_index)
-            x_index = abs(3 - start_index)
-            # now that we have the indeces, let's get the values
-            button_value = values[button_index]
-            y_value = values[y_index]
-            x_value = values[x_index]
-            return (button_value, y_value, x_value)
-        return wrapped
-
-    @sort_values   
-    @convert_values
     def read_values(self):
-        return (self.ser.readline(), self.ser.readline(),
-             self.ser.readline(), self.ser.readline())
+        line = self.ser.readline().decode('ascii')
+        values = line.strip().split(' ')
+        if values[0] != '0' or len(values) is not 4:
+            raise BadInputError
+        del values[0]
+        values = [int(value) for value in values]
+        assert len(values) is 3, 'there should be 3 output values'
+        return values
+        
 
     def interpret_values(self, sorted_values=None):
         '''Interprets the pre-sorted joystick data.
@@ -63,7 +36,7 @@ class JoystickReader(object):
         # let's check that we are given correctly sorted values with the right data 
         # (3 items, button value, which is at index 0, has to be 1 or 2)
         if len(sorted_values) > 3 or button_value not in {1, 2}:
-            raise BadInputError('Bad input data')
+            raise BadInputError
         # okay, if the data are right, then let's interpret them
         # the button is pressed when its value is 1 (and not pressed when it's 2)
         button_pressed = True if button_value is 1 else False

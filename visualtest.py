@@ -43,6 +43,24 @@ class MagicSphere(sphere):
    @property
    def mass(self):
        return self.density * self.volume
+       
+       
+def actor_velocity(values):
+    if values['x_direction'] == 'right':
+        x = values['x_steps']
+    elif values['x_direction'] == 'left':
+        x = -(values['x_steps'])
+    else:
+        x = 0
+    
+    if values['y_direction'] == 'up':
+        y = values['y_steps']
+    elif values['y_direction'] == 'down':
+        y = -(values['y_steps'])
+    else:
+        y = 0
+    
+    return vector(x, y)
         
 def move(pos, velocity, bounds=vector(5, 5)):
     new_pos = pos + velocity
@@ -91,7 +109,7 @@ def touch(square, circle):
 
 
 def main():
-    canvas = box(pos=vector(0, 0), size=(10,10), color=color.white)
+    # canvas = box(pos=vector(0, 0), size=(10,10), color=color.white)
     square = MagicBox(pos=vector(0, 0), size=(2, 2, 2), color=color.blue)
     ball = MagicSphere(pos=vector(2, 2), radius=0.5, color=color.green)
     
@@ -117,21 +135,6 @@ def main():
             square.color = color.red
         elif values['button_pressed'] is False:
             square.color = color.blue
-            
-        
-        if values['x_direction'] == 'right':
-            x = values['x_steps']
-        elif values['x_direction'] == 'left':
-            x = -(values['x_steps'])
-        else:
-            x = 0
-        
-        if values['y_direction'] == 'up':
-            y = values['y_steps']
-        elif values['y_direction'] == 'down':
-            y = -(values['y_steps'])
-        else:
-            y = 0
         
         square.velocity = vector(x, y)
     
@@ -141,7 +144,9 @@ def main():
             ball.velocity = vector(x/impact, y/impact)
             t = 0
             while t < 3:
-                ball.pos = ball.pos + ball.velocity*deltat
+                new_pos = ball.pos + ball.velocity*deltat
+                if new_pos < vector(5, 5):
+                    ball.pos = new_pos
                 t += deltat
         else:
             ball.color = color.green
