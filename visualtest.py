@@ -4,7 +4,7 @@
 
 # let's make it as much like python3 as we can
 from __future__ import division, print_function, unicode_literals
-import sys, time
+import sys, time, math
 # vpython
 from visual import *
 # joystick
@@ -14,37 +14,44 @@ class MagicBox(box):
     '''Custom box class to define useful properties'''
     
     @property
+    def volume(self):
+        return self.size.x * self.size.y * self.size.z
+    
+    @property
+    def density(self):
+        return 2.75
+    
+    @property
+    def mass(self):
+        return self.density * self.volume
+    
+    @property
     def half_size(self):
         half_size = vector(self.size.x / 2, self.size.y / 2)
         return half_size
-    
-    @property
-    def top_left_corner(self):
-        x = self.pos.x - (self.size.x / 2)
-        y = self.pos.y + (self.size.y / 2)
-        return vector(x, y)
-    
-    @property
-    def top_right_corner(self):
-        x = self.pos.x + (self.size.x / 2)
-        y = self.pos.y + (self.size.y / 2)
-        return vector(x, y)
-    
-    @property
-    def bottom_left_corner(self):
-        x = self.pos.x - (self.size.x / 2)
-        y = self.pos.y - (self.size.y / 2)
-        return vector(x, y)
-    
-    @property
-    def bottom_right_corner(self):
-        x = self.pos.x + (self.size.x / 2)
-        y = self.pos.y - (self.size.y / 2)
-        return vector(x, y)
         
 class MagicSphere(sphere):
-   pass
+   
+   @property
+   def volume(self):
+       return (4 * math.pi * self.radius**3) / 3
+   
+   @property
+   def density(self):
+       return 2.75
+   
+   @property
+   def mass(self):
+       return self.density * self.volume
         
+def move(pos, velocity, bounds=vector(5, 5)):
+    new_pos = pos + velocity
+    
+    if new_pos.x <= bounds.x and new_pos.y <= bounds.y:
+        return new_pos
+    else:
+        return pos
+    
 
 def touch(square, circle):
     """Let's define touch as the edge of the box touching the surface of the sphere 
@@ -70,11 +77,11 @@ def touch(square, circle):
     dist_y = abs(square.pos.y - circle.pos.y)
     
     # let's compare those distances
-    if (round(dist_x, 1) == square.half_size.x + circle.radius
+    if (round(dist_x, 1) <= square.half_size.x + circle.radius
         and dist_y <= square.half_size.x + circle.radius):
         print('touch')
         return True
-    elif (round(dist_y, 1) == square.half_size.y + circle.radius
+    elif (round(dist_y, 1) <= square.half_size.y + circle.radius
         and dist_x <= square.half_size.y + circle.radius):
         print('touch')
         return True
@@ -85,12 +92,13 @@ def touch(square, circle):
 
 def main():
     canvas = box(pos=vector(0, 0), size=(10,10), color=color.white)
-    square = MagicBox(pos=vector(0, 0), size=(2, 2), color=color.blue)
+    square = MagicBox(pos=vector(0, 0), size=(2, 2, 2), color=color.blue)
     ball = MagicSphere(pos=vector(2, 2), radius=0.5, color=color.green)
     
-    deltat = 0.010
+    deltat = 0.005
     
     jr = JoystickReader()
+    # scene.autoscale = False
     
     while True:
         try:
@@ -126,15 +134,18 @@ def main():
             y = 0
         
         square.velocity = vector(x, y)
-        ball.velocity = square.velocity
-
+    
         if touch(square, ball):
-             new_pos = square.pos - square.velocity*deltat
+            ball.color = color.orange
+            impact = square.mass/ball.mass
+            ball.velocity = vector(x/impact, y/impact)
+            t = 0
+            while t < 3:
+                ball.pos = ball.pos + ball.velocity*deltat
+                t += deltat
         else:
-            new_pos = square.pos + square.velocity*deltat
-            
-        if abs(new_pos.x) <= 5 and abs(new_pos.y) <= 5:
-            square.pos = new_pos 
+            ball.color = color.green
+            square.pos = move(square.pos, square.velocity*deltat)
 
 if __name__ == '__main__':
     main()
