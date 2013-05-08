@@ -1,4 +1,3 @@
-
 int XPin = 0;   
 int YPin = 1;      
 int ButtonPin = 6;  
