@@ -86,7 +86,7 @@ def touch(square, circle):
 def main():
     canvas = box(pos=vector(0, 0), size=(10,10), color=color.white)
     square = MagicBox(pos=vector(0, 0), size=(2, 2), color=color.blue)
-    ball = MagicSphere(pos=vector(1, 0), radius=0.5, color=color.green)
+    ball = MagicSphere(pos=vector(2, 2), radius=0.5, color=color.green)
     
     deltat = 0.010
     
@@ -128,14 +128,13 @@ def main():
         square.velocity = vector(x, y)
         ball.velocity = square.velocity
 
-        # print('Square position: ', square.pos)
-        # print('Ball position: ', ball.pos)
-
-        touch(square, ball)
-
-        new_pos = square.pos + square.velocity*deltat
+        if touch(square, ball):
+             new_pos = square.pos - square.velocity*deltat
+        else:
+            new_pos = square.pos + square.velocity*deltat
+            
         if abs(new_pos.x) <= 5 and abs(new_pos.y) <= 5:
-            square.pos = new_pos
+            square.pos = new_pos 
 
 if __name__ == '__main__':
     main()
