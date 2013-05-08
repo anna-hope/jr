@@ -6,8 +6,11 @@ import serial
 
 # a custom exception for when we are given bad data
 class BadInputError(Exception):
+    def __init__(self, message):
+        self.message = message
+    
     def __str__(self):
-        return 'Bad input data'
+        return self.message
 
 class JoystickReader(object):
     def __init__(self, port='/dev/tty.usbmodemfd121', baudrate=9600):
@@ -60,7 +63,7 @@ class JoystickReader(object):
         # let's check that we are given correctly sorted values with the right data 
         # (3 items, button value, which is at index 0, has to be 1 or 2)
         if len(sorted_values) > 3 or button_value not in {1, 2}:
-            raise BadInputError
+            raise BadInputError('Bad input data')
         # okay, if the data are right, then let's interpret them
         # the button is pressed when its value is 1 (and not pressed when it's 2)
         button_pressed = True if button_value is 1 else False
