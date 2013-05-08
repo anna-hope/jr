@@ -20,5 +20,5 @@ void loop()
   Serial.println(Yval);
   Serial.println(Xval);
   
-  delay(200);
+  delay(100);
 }
