@@ -1,12 +1,36 @@
 #!/usr/bin/env python3.3
 
-import argparse, pprint
-from joystickreader import JoystickReader, BadInputError
+import argparse, pprint, sys
+from joystickreader import JoystickReader, BadInputError, BadPortError
+
+def calibrate():
+    x_zero = int(input('Zero for x\n> '))
+    y_zero = int(input('Zero for y\n> '))
+    return x_zero, y_zero
 
 def main():
     # initialise the serial port
     print('Initialising the serial port...')
-    jr = JoystickReader()
+    x_zero = 127
+    y_zero = 127
+    if args.calibrate:
+        x_zero, y_zero = calibrate()
+    if args.port:
+        jr = JoystickReader(port=args.port, x_zero=x_zero, y_zero=y_zero)
+    else:
+        try:
+            jr = JoystickReader()
+        except BadPortError:
+            connected = False
+            while not connected:
+                port = input('port: ')
+                try:
+                    jr = JoystickReader(port=port, x_zero=x_zero, y_zero=y_zero)
+                except BadPortError:
+                    continue
+                else:
+                    connected = True
+    
     
     pp = pprint.PrettyPrinter()
     
@@ -29,7 +53,7 @@ def main():
             if last_values['x_steps'] != values['x_steps'] or last_values['y_steps'] != values['y_steps']:
                 last_values = values
                 
-                if args.v:
+                if args.r:
                     pp.pprint(values)
                 else:
                     button_pressed = values['button_pressed']
@@ -58,6 +82,10 @@ def main():
 
 if __name__ == '__main__':
     argp = argparse.ArgumentParser()
-    argp.add_argument('-v', action='store_true', default=False, help='verbose mode')
+    argp.add_argument('-p', '--port', type=str, default='/dev/tty.usbmodemfa131',
+                     help='serial port to connect on')
+    argp.add_argument('-r', action='store_true', default=False, help='raw mode')
+    argp.add_argument('-c', '--calibrate', action='store_true',
+                         help='calibration mode')
     args = argp.parse_args()
     main()
