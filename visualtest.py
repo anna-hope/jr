@@ -136,12 +136,12 @@ def main():
         elif values['button_pressed'] is False:
             square.color = color.blue
         
-        square.velocity = vector(x, y)
+        square.velocity = actor_velocity(values)
     
         if touch(square, ball):
             ball.color = color.orange
             impact = square.mass/ball.mass
-            ball.velocity = vector(x/impact, y/impact)
+            ball.velocity = vector(square.velocity.x/impact, square.velocity.y/impact)
             t = 0
             while t < 3:
                 new_pos = ball.pos + ball.velocity*deltat
