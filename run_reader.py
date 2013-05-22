@@ -26,7 +26,8 @@ def main():
                 port = input('port: ')
                 try:
                     jr = JoystickReader(port=port, x_zero=x_zero, y_zero=y_zero)
-                except BadPortError:
+                except BadPortError as e:
+                    print(e)
                     continue
                 else:
                     connected = True
